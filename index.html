@@ -386,6 +386,22 @@
     align-items: center;
   }
 
+  .filter-row.title {
+    height: 24px;
+    font-size: 12px;
+    margin-right: 5px;
+    display: flex;
+    align-items: center;
+  }
+
+  .filter-row.title.no-results {
+    color: rgba(181, 56, 56, 1);
+  }
+
+  .filter-row.title .filter-label {
+    margin-left: 15px;
+  }
+
   .filter-row select {
     font-size: 14px;
     margin: 2px 4px;
@@ -407,7 +423,15 @@
   }
 
   .filter-label.selected {
-    background: #c7c6c6;
+    background: rgba(37, 116, 90, 0.37);
+  }
+
+  .filter-label.selected.is-negated {
+    background: rgba(116, 37, 37, 0.37);
+  }
+
+  .filter-label.selected.negation-button {
+    background: rgba(96, 96, 96, 0.36);
   }
 
   .filter-label.secondary {
@@ -419,7 +443,7 @@
   }
 
   .filter-label:hover {
-    opacity: 0.5;
+    opacity: 0.7;
     cursor: pointer;
     box-shadow: 0 0 5px 0 rgba(235, 235, 235, 0.8)
   }
@@ -480,6 +504,7 @@
   }
 
   const removeItem = (array, item) => array.filter(currentItem => currentItem !== item)
+  const addItem = (currentArray, newItem) => [...currentArray, newItem]
 
   const getGunsByType = (guns) => {
     const gunsByType = {
@@ -520,9 +545,9 @@
   const $ = jQuery
 
   const initialData = []
-  const DATE = 0
-  const VENUE = 1
-  const GUNS = 2
+  const INDEX_DATE = 0
+  const INDEX_VENUE = 1
+  const INDEX_GUNS = 2
 
 
   $('#doszkolenie ~ table tbody tr').each(function () {
@@ -542,10 +567,10 @@
 
   const trainings = initialData.map((dataArr, index) => ({
     id: index,
-    day: getTrainingDay(dataArr[DATE]),
-    hour: getTrainingHour(dataArr[DATE]),
-    venue: dataArr[VENUE],
-    guns: getTrainingGuns(dataArr[GUNS])
+    day: getTrainingDay(dataArr[INDEX_DATE]),
+    hour: getTrainingHour(dataArr[INDEX_DATE]),
+    venue: dataArr[INDEX_VENUE],
+    guns: removeNonAsciiChars(getTrainingGuns(dataArr[INDEX_GUNS]))
   }))
 
   const gunsAll = sortItems(removeDuplicates(removeNonAsciiChars(flattenArray(trainings.map(training => training.guns)))))
@@ -568,92 +593,209 @@
     'fontSize': '20px'
   }
 
-  const getOnClick = ({ handleClick, isNegationButton, isClearButton }) => {
-    if (isNegationButton) {
-      return
-    }
-
-    if (isClearButton) {
-      return
-    }
-
-    if (handleClick) {
-      return handleClick
-    }
-
-    return () => null
-  }
-
   const Label = (props) => {
-    const { text, isTitle, isSelected, handleClick, isSecondary, group, isNegationButton, isClearButton } = props
+    const { text, isTitle, isSelected, handleClick, isSecondary, isNegated, isNegationButton, isClearButton } = props
     const classes = classNames(
       'filter-label',
       { title: isTitle },
       { selected: isSelected },
-      { secondary: isSecondary }
+      { secondary: isSecondary },
+      { 'is-negated': isSelected && isNegated },
+      { 'negation-button': isNegationButton },
     )
 
-    const onClick = getOnClick({ handleClick, group, isNegationButton, isClearButton })
+    const onClick = handleClick || (() => null)
 
     return <div className={classes} onClick={onClick}>{text}</div>
   }
 
+  const VENUE = 'venue'
+  const DAYS = 'days'
+  const HOURS = 'hours'
+  const GUN = 'gun'
+
+  const FILTER_INITIAL_VALUES = {
+    [VENUE]: '',
+    [DAYS]: [],
+    [HOURS]: [],
+    [GUN]: ''
+  }
+
   const Filter = () => {
-    const [selectedVenue, setSelectedVenue] = React.useState('')
-    const [selectedDays, setSelectedDays] = React.useState([])
-    const [selectedHours, setSelectedHours] = React.useState([])
-    const [selectedGun, setSelectedGun] = React.useState('')
 
-    const handleVenueClick = (value) => () => {
-      setSelectedVenue(value)
-    }
+    const [negationFields, setNegationFields] = React.useState({
+      [VENUE]: false,
+      [DAYS]: false,
+      [HOURS]: false,
+      [GUN]: false
+    })
 
-    const handleDaysClick = (value) => () => {
-      if (selectedDays.includes(value)) {
-        setSelectedDays(removeItem(selectedDays, value))
-        return
+    const [filterFields, setFilterFields] = React.useState({
+      [VENUE]: FILTER_INITIAL_VALUES[VENUE],
+      [DAYS]: FILTER_INITIAL_VALUES[DAYS],
+      [HOURS]: FILTER_INITIAL_VALUES[HOURS],
+      [GUN]: FILTER_INITIAL_VALUES[GUN]
+    })
+
+    const [filteredTrainings, setFilteredTrainings] = React.useState([])
+
+    const filteredTrainingIds = filteredTrainings.map(training => training.id)
+    const filteredTrainingsCount = filteredTrainings.length
+    const totalTrainingsCount = trainings.length
+    const isFilterApplied = filterFields[VENUE] !== FILTER_INITIAL_VALUES[VENUE]
+      || filterFields[DAYS] !== FILTER_INITIAL_VALUES[DAYS]
+      || filterFields[HOURS] !== FILTER_INITIAL_VALUES[HOURS]
+      || filterFields[GUN] !== FILTER_INITIAL_VALUES[GUN]
+    const hasAnyFilterResults = isFilterApplied && filteredTrainingsCount > 0
+
+    const getFilterText = () => {
+      if (!isFilterApplied) {
+        return `Wyświetlam wszystkie dostępne treningi (${totalTrainingsCount})`
       }
 
-      setSelectedDays([...selectedDays, value])
-    }
-
-    const handleHoursClick = (value) => () => {
-      if (selectedHours.includes(value)) {
-        setSelectedHours(removeItem(selectedHours, value))
-        return
+      if (!hasAnyFilterResults) {
+        return 'Brak wyników dla obecnych ustawień filtra'
       }
-      setSelectedHours([...selectedHours, value])
+
+      return `Wyświetlam pasujące Ci treningi (${filteredTrainingsCount}/${totalTrainingsCount})`
     }
 
-    const handleGunChange = (event) => {
-      setSelectedGun(event.target.value)
+    const handleNegationFieldsClick = (group, shouldReset) => () => {
+      let valueToSet
+
+      if (shouldReset) {
+        valueToSet = false
+      } else if (group) {
+        valueToSet = !negationFields[group]
+      }
+
+      setNegationFields({
+        ...negationFields,
+        [group]: valueToSet
+      })
     }
 
-    const filterItems = () => {
+    const handleClearField = (group) => () => {
+      setFilterFields({
+        ...filterFields,
+        [group]: FILTER_INITIAL_VALUES[group]
+      })
+
+      handleNegationFieldsClick(group, true)()
+    }
+
+    const handleClearFilter = () => {
+      setFilterFields({
+        [VENUE]: FILTER_INITIAL_VALUES[VENUE],
+        [DAYS]: FILTER_INITIAL_VALUES[DAYS],
+        [HOURS]: FILTER_INITIAL_VALUES[HOURS],
+        [GUN]: FILTER_INITIAL_VALUES[GUN]
+      })
+
+      setNegationFields({
+        [VENUE]: false,
+        [DAYS]: false,
+        [HOURS]: false,
+        [GUN]: false
+      })
+    }
+
+    const handleFilterFieldClick = (group, value, isSelectComponent) => (event) => {
+      let valueToSet
+
+      if (isSelectComponent) {
+        valueToSet = event.target.value
+      } else {
+
+        const isFieldString = typeof FILTER_INITIAL_VALUES[group] === 'string'
+        const isFieldArray = !isFieldString
+
+        if (isFieldString) {
+          valueToSet = value
+        }
+
+        if (isFieldArray) {
+          const isAlreadySelected = filterFields[group].includes(value)
+
+          if (isAlreadySelected) {
+            valueToSet = removeItem(filterFields[group], value)
+          } else {
+            valueToSet = addItem(filterFields[group], value)
+          }
+        }
+      }
+
+      setFilterFields({
+        ...filterFields,
+        [group]: valueToSet
+      })
+    }
+
+    const considerNegation = (group, baseCondition) => {
+      const shouldNegate = negationFields[group]
+
+      return shouldNegate ? !baseCondition : baseCondition
+    }
+
+    const filterTrainings = () => {
       const results = trainings.filter(training => {
-        //
+        const venueMatches = !filterFields[VENUE] || considerNegation(VENUE, filterFields[VENUE] === training.venue)
+        const dayMatches = !filterFields[DAYS].length || considerNegation(DAYS, filterFields[DAYS].includes(training.day))
+        const hourMatches = !filterFields[HOURS].length || considerNegation(HOURS, filterFields[HOURS].includes(removeMinutes(training.hour)))
+        const gunMatches = !filterFields[GUN] || considerNegation(GUN, training.guns.some(gun => filterFields[GUN] === gun))
+
+        return venueMatches && dayMatches && hourMatches && gunMatches
+      })
+
+      setFilteredTrainings(results)
+    }
+
+    const updateTrainingsTableDOM = () => {
+      $('#doszkolenie ~ table tbody tr').each(function (index) {
+        if (!isFilterApplied) {
+          $(this).show()
+          return
+        }
+
+        if (filteredTrainingIds.includes(index)) {
+          $(this).show()
+        } else {
+          $(this).hide()
+        }
       })
     }
 
     React.useEffect(() => {
-      filterItems()
-    }, [selectedVenue, selectedHours, selectedDays, selectedGun])
+      filterTrainings()
+    }, [filterFields, negationFields])
+
+    React.useEffect(() => {
+      updateTrainingsTableDOM()
+    }, [filteredTrainingIds])
 
     return (
       <div style={filtersContainerStyles}>
+        <div className={classNames('filter-row title', { 'no-results': isFilterApplied && !hasAnyFilterResults })}>
+          <div>{getFilterText()}</div>
+          {isFilterApplied &&
+            <Label isSecondary isClearButton text='Wyczyść filtry' handleClick={handleClearFilter}/>
+          }
+        </div>
+
         <div className='filter-row'>
           <Label isTitle text='Obiekt:'/>
 
           <div className='filter-options'>
             {options.venues.map((venueName) => (
-              <Label key={venueName} text={venueName} isSelected={venueName === selectedVenue}
-                     handleClick={handleVenueClick(venueName)}/>
+              <Label key={venueName} text={venueName} isSelected={venueName === filterFields[VENUE]}
+                     handleClick={handleFilterFieldClick(VENUE, venueName)} isNegated={negationFields[VENUE]}/>
             ))}
           </div>
-          {selectedVenue &&
+
+          {filterFields[VENUE] &&
           <React.Fragment>
-            <Label isSecondary isClearButton group='venues' text='Oprócz wybranych'/>
-            <Label isSecondary isNegationButton group='venues' text='Wyczyść'/>
+            <Label isSecondary isNegationButton isSelected={negationFields[VENUE]} text='Oprócz wybranych' handleClick={handleNegationFieldsClick(VENUE)} />
+            <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(VENUE)}/>
           </React.Fragment>
           }
         </div>
@@ -662,13 +804,14 @@
           <Label isTitle text='Dni:'/>
           <div className='filter-options'>
             {options.days.map(day => (
-              <Label key={day} text={day} isSelected={selectedDays.includes(day)} handleClick={handleDaysClick(day)}/>
+              <Label key={day} text={day} isSelected={filterFields[DAYS].includes(day)}
+                     handleClick={handleFilterFieldClick(DAYS, day)} isNegated={negationFields[DAYS]}/>
             ))}
           </div>
-          {selectedDays.length > 0 &&
+          {filterFields[DAYS].length > 0 &&
           <React.Fragment>
-            <Label isSecondary isClearButton group='days' text='Oprócz wybranych'/>
-            <Label isSecondary isNegationButton group='days' text='Wyczyść'/>
+            <Label isSecondary isNegationButton isSelected={negationFields[DAYS]} text='Oprócz wybranych' handleClick={handleNegationFieldsClick(DAYS)} />
+            <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(DAYS)} />
           </React.Fragment>
           }
 
@@ -679,15 +822,15 @@
           <div className='filter-options'>
 
             {options.hoursNoMinutes.map(hour => (
-              <Label key={hour} text={hour} isSelected={selectedHours.includes(hour)}
-                     handleClick={handleHoursClick(hour)}/>
+              <Label key={hour} text={hour} isSelected={filterFields[HOURS].includes(hour)}
+                     handleClick={handleFilterFieldClick(HOURS, hour)} isNegated={negationFields[HOURS]}/>
             ))}
           </div>
 
-          {selectedHours.length > 0 &&
+          {filterFields[HOURS].length > 0 &&
           <React.Fragment>
-            <Label isSecondary isClearButton group='hours' text='Oprócz wybranych'/>
-            <Label isSecondary isNegationButton group='hours' text='Wyczyść'/>
+            <Label isSecondary isNegationButton isSelected={negationFields[HOURS]} text='Oprócz wybranych' handleClick={handleNegationFieldsClick(HOURS)} />
+            <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(HOURS)} />
           </React.Fragment>
           }
         </div>
@@ -696,7 +839,7 @@
           <Label isTitle text='Broń:'/>
           <div className='filter-options'>
 
-            <select value={selectedGun} onChange={handleGunChange}>
+            <select value={filterFields[GUN]} onChange={handleFilterFieldClick(GUN, null, true)}>
               <option disabled hidden value=''>Wybierz</option>
 
               <option disabled>Pistolety</option>
@@ -732,10 +875,10 @@
 
           </div>
 
-          {selectedGun &&
-            <React.Fragment>
-              <Label isSecondary isNegationButton group='guns' text='Wyczyść'/>
-            </React.Fragment>
+          {filterFields[GUN] &&
+          <React.Fragment>
+            <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(GUN)} />
+          </React.Fragment>
           }
         </div>
 
