@@ -375,11 +375,13 @@
 <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/classnames/2.2.6/index.min.js"
-        integrity="sha512-PMVw2HzV4gXtPe+BpvOQRQe9HtKcU4jA4N9ilRq+paTcz/ERKCt4d9hqXlslfsKOydknA4Y4JsiQexm/1W8zIA=="
-        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/classnames/2.2.6/index.min.js"></script>
 
 <style>
+  .filter-container {
+    font-size: 20px;
+  }
+
   .filter-row {
     display: flex;
     margin: 5px 0;
@@ -549,6 +551,21 @@
   const INDEX_VENUE = 1
   const INDEX_GUNS = 2
 
+  const VENUE = 'venue'
+  const DAYS = 'days'
+  const HOURS = 'hours'
+  const GUN = 'gun'
+
+  const FILTER_INITIAL_VALUES = {
+    [VENUE]: '',
+    [DAYS]: [],
+    [HOURS]: [],
+    [GUN]: ''
+  }
+
+  const getTrainingDay = (data) => data.split(')')[0] + ')'
+  const getTrainingHour = (data) => data.split(') ')[1].slice(0, 5)
+  const getTrainingGuns = (data) => data.split(',')
 
   $('#doszkolenie ~ table tbody tr').each(function () {
     const row = []
@@ -560,10 +577,6 @@
 
     initialData.push(row)
   })
-
-  const getTrainingDay = (data) => data.split(')')[0] + ')'
-  const getTrainingHour = (data) => data.split(') ')[1].slice(0, 5)
-  const getTrainingGuns = (data) => data.split(',')
 
   const trainings = initialData.map((dataArr, index) => ({
     id: index,
@@ -589,10 +602,6 @@
     gunsOthers: sortItems(gunsByType.others)
   }
 
-  const filtersContainerStyles = {
-    'fontSize': '20px'
-  }
-
   const Label = (props) => {
     const { text, isTitle, isSelected, handleClick, isSecondary, isNegated, isNegationButton, isClearButton } = props
     const classes = classNames(
@@ -609,32 +618,20 @@
     return <div className={classes} onClick={onClick}>{text}</div>
   }
 
-  const VENUE = 'venue'
-  const DAYS = 'days'
-  const HOURS = 'hours'
-  const GUN = 'gun'
-
-  const FILTER_INITIAL_VALUES = {
-    [VENUE]: '',
-    [DAYS]: [],
-    [HOURS]: [],
-    [GUN]: ''
-  }
-
   const Filter = () => {
-
-    const [negationFields, setNegationFields] = React.useState({
-      [VENUE]: false,
-      [DAYS]: false,
-      [HOURS]: false,
-      [GUN]: false
-    })
 
     const [filterFields, setFilterFields] = React.useState({
       [VENUE]: FILTER_INITIAL_VALUES[VENUE],
       [DAYS]: FILTER_INITIAL_VALUES[DAYS],
       [HOURS]: FILTER_INITIAL_VALUES[HOURS],
       [GUN]: FILTER_INITIAL_VALUES[GUN]
+    })
+
+    const [negationFields, setNegationFields] = React.useState({
+      [VENUE]: false,
+      [DAYS]: false,
+      [HOURS]: false,
+      [GUN]: false
     })
 
     const [filteredTrainings, setFilteredTrainings] = React.useState([])
@@ -737,12 +734,20 @@
       return shouldNegate ? !baseCondition : baseCondition
     }
 
+    const checkIfMatches = (group, isAnythingSelected, matchingCondition) => {
+      if (!isAnythingSelected) {
+        return true
+      }
+
+      return considerNegation(group, matchingCondition)
+    }
+
     const filterTrainings = () => {
       const results = trainings.filter(training => {
-        const venueMatches = !filterFields[VENUE] || considerNegation(VENUE, filterFields[VENUE] === training.venue)
-        const dayMatches = !filterFields[DAYS].length || considerNegation(DAYS, filterFields[DAYS].includes(training.day))
-        const hourMatches = !filterFields[HOURS].length || considerNegation(HOURS, filterFields[HOURS].includes(removeMinutes(training.hour)))
-        const gunMatches = !filterFields[GUN] || considerNegation(GUN, training.guns.some(gun => filterFields[GUN] === gun))
+        const venueMatches = checkIfMatches(VENUE, filterFields[VENUE], filterFields[VENUE] === training.venue)
+        const dayMatches = checkIfMatches(DAYS, filterFields[DAYS].length, filterFields[DAYS].includes(training.day))
+        const hourMatches = checkIfMatches(HOURS, filterFields[HOURS].length, filterFields[HOURS].includes(removeMinutes(training.hour)))
+        const gunMatches = checkIfMatches(GUN, filterFields[GUN], training.guns.some(gun => filterFields[GUN] === gun))
 
         return venueMatches && dayMatches && hourMatches && gunMatches
       })
@@ -774,7 +779,7 @@
     }, [filteredTrainingIds])
 
     return (
-      <div style={filtersContainerStyles}>
+      <div className="filter-container">
         <div className={classNames('filter-row title', { 'no-results': isFilterApplied && !hasAnyFilterResults })}>
           <div>{getFilterText()}</div>
           {isFilterApplied &&
@@ -808,6 +813,7 @@
                      handleClick={handleFilterFieldClick(DAYS, day)} isNegated={negationFields[DAYS]}/>
             ))}
           </div>
+
           {filterFields[DAYS].length > 0 &&
           <React.Fragment>
             <Label isSecondary isNegationButton isSelected={negationFields[DAYS]} text='Oprócz wybranych' handleClick={handleNegationFieldsClick(DAYS)} />
