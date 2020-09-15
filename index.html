@@ -316,22 +316,43 @@
               <span>Tisas Zig m1911</span>, <span>UZI</span></td>
           </tr>
         </table>
-        <p><strong>Nie możesz się zapisać</strong>, bo nie spełniasz warunków:</p><br/>
-        <p>1. Musisz mieć na koncie minimum 1.29 zł składki (masz: <span style='color:green'>254 zł</span>, czyli OK)
-        </p><br/>
-        <p>2. Musisz zaliczyć teorię. Twój obecny status zaliczenia: <span style='color:red'>5%</span>. Wymagane:
-          <strong>90%</strong></p><br/>
-        <p>Teorię zaliczysz na PatentStrzelecki.eu (PS.eu). Najpierw <a href="https://patentstrzelecki.eu/spis-tresci"
-                                                                        target="_blank">przerób kurs</a>, a następnie
-          egzaminy. Zaliczysz jeśli odpowiesz poprawnie na minimum 90% "sensownych" pytań (około 20 egzaminów). Na <a
-                  href="https://PatentStrzelecki.eu/konto/8630589832dbd7" target="_blank">swoim kluczu PS.eu</a>
-          sprawdzisz statystyki postępów. <a href="/procedury/#Jak_zdac_teoretyczna_czesc_kursu" target="_blank">Więcej
-            informacji.</a></p><br/>
 
-        <p>Egzaminy rób <strong>wyłącznie wchodząc przez ten link: <a
-                href="https://PatentStrzelecki.eu/konto/8630589832dbd7" target="_blank">Twoje egzaminy.</a></strong>
-          Inaczej wyniki nie będą przypisane do Ciebie.</p><br/>
-        <hr/>
+
+
+        <h5>Rejestracja</h5><form method="post">
+  <input type="hidden" name="frm_action" value="event-register" />
+  <table class="dl-table-70 b-o-m">
+
+    <tr class="">
+      <th scope="row" class="b-o-m" style="font-weight: 700;max-width:50px">Termin</th>
+      <td class="b-o-m"> <select name="comp_game" class="input-large">
+    <option value='1432_105_180'>WLDF 15.09, g. 21:00 AKM 7.62 Jack (70zł)</option><br/>
+<option value='1432_96_180'>WLDF 15.09, g. 21:00 Mossberg 88 (40zł)</option><br/>
+<option value='1432_181_180'>WLDF 15.09, g. 21:00 POF MP5 (45zł)</option><br/>
+<option value='1432_102_180'>WLDF 15.09, g. 21:00 S&W MP15-22 (30zł)</option><br/>
+<option value='1432_105_240'>WLDF 15.09, g. 22:00 AKM 7.62 Jack (70zł)</option><br/>
+<option value='1432_81_240'>WLDF 15.09, g. 22:00 Glock 17 (45zł)</option><br/>
+<option value='1432_58_240'>WLDF 15.09, g. 22:00 Margolin (30zł)</option><br/>
+<option value='1432_181_240'>WLDF 15.09, g. 22:00 POF MP5 (45zł)</option><br/>
+<option value='1432_102_240'>WLDF 15.09, g. 22:00 S&W MP15-22 (30zł)</option><br/>
+<option value='1432_105_270'>WLDF 15.09, g. 22:30 AKM 7.62 Jack (70zł)</option><br/>
+<option value='1432_81_270'>WLDF 15.09, g. 22:30 Glock 17 (45zł)</option><br/>
+<option value='1432_96_270'>WLDF 15.09, g. 22:30 Mossberg 88 (40zł)</option><br/>
+<option value='1432_181_270'>WLDF 15.09, g. 22:30 POF MP5 (45zł)</option><br/>
+<option value='1432_102_270'>WLDF 15.09, g. 22:30 S&W MP15-22 (30zł)</option>
+<option value='1402_105_240'>SKW 16.09, g. 15:00 AKM 7.62 Jack (70zł)</option></select></td>
+    </tr>
+    <tr class="b-o-m">
+    <td></td>
+      <td class="b-o-m"><strong><button type="submit">Zapisz mnie</button></strong></td>
+    </tr>
+  </table>
+</form>
+
+
+
+
+
         <h3 id="rozkladanie">Kurs budowy i obsługi broni</h3>
         <p>Szkolenie z budowy i obsługi broni: składanie, rozkładanie, czyszczenie. Około 25 różnych modeli broni
           palnej, 5h zabawy.</p><br/>
@@ -505,6 +526,7 @@
     return gunTypes.some(gunFamily => gun.toLowerCase().includes(gunFamily.toLowerCase()))
   }
 
+  const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)))
   const removeItem = (array, item) => array.filter(currentItem => currentItem !== item)
   const addItem = (currentArray, newItem) => [...currentArray, newItem]
 
@@ -546,7 +568,8 @@
 
   const $ = jQuery
 
-  const initialData = []
+  const initialDataTrainingsTable = []
+  const initialDataTrainingsSelect = []
   const INDEX_DATE = 0
   const INDEX_VENUE = 1
   const INDEX_GUNS = 2
@@ -563,11 +586,14 @@
     [GUN]: ''
   }
 
+  const TRAINING_TABLE_ROWS_SELECTOR = '#doszkolenie ~ table tbody tr'
+  const TRAINING_SELECT_INPUT_OPTIONS_SELECTOR = '#doszkolenie ~ form select[name="comp_game"] option'
+
   const getTrainingDay = (data) => data.split(')')[0] + ')'
   const getTrainingHour = (data) => data.split(') ')[1].slice(0, 5)
   const getTrainingGuns = (data) => data.split(',')
 
-  $('#doszkolenie ~ table tbody tr').each(function () {
+  $(TRAINING_TABLE_ROWS_SELECTOR).each(function () {
     const row = []
 
     $(this).children().each(function () {
@@ -575,24 +601,34 @@
 
     })
 
-    initialData.push(row)
+    initialDataTrainingsTable.push(row)
   })
 
-  const trainings = initialData.map((dataArr, index) => ({
+  $(TRAINING_SELECT_INPUT_OPTIONS_SELECTOR).each(function () {
+    const row = []
+
+    $(this).each(function () {
+      row.push($(this).text())
+    })
+
+    initialDataTrainingsSelect.push(row)
+  })
+
+  const trainings = initialDataTrainingsTable.map((dataArr, index) => ({
     id: index,
     day: getTrainingDay(dataArr[INDEX_DATE]),
     hour: getTrainingHour(dataArr[INDEX_DATE]),
     venue: dataArr[INDEX_VENUE],
-    guns: removeNonAsciiChars(getTrainingGuns(dataArr[INDEX_GUNS]))
+    guns: compose(removeNonAsciiChars, getTrainingGuns)(dataArr[INDEX_GUNS])
   }))
 
-  const gunsAll = sortItems(removeDuplicates(removeNonAsciiChars(flattenArray(trainings.map(training => training.guns)))))
+  const gunsAll = compose(sortItems, removeDuplicates, removeNonAsciiChars, flattenArray)(trainings.map(training => training.guns))
   const gunsByType = getGunsByType(gunsAll)
 
   const options = {
     days: removeDuplicates(trainings.map(training => training.day)),
-    hoursWithMinutes: sortItems(removeDuplicates(trainings.map(training => training.hour))),
-    hoursNoMinutes: sortItems(removeDuplicates(trainings.map(training => removeMinutes(training.hour)))),
+    hoursWithMinutes: compose(sortItems, removeDuplicates)(trainings.map(training => training.hour)),
+    hoursNoMinutes: compose(sortItems, removeDuplicates)(trainings.map(training => removeMinutes(training.hour))),
     venues: sortItems(removeDuplicates(trainings.map(training => training.venue))),
     gunsAll: gunsAll,
     gunsPistols: sortItems(gunsByType.pistols),
@@ -756,7 +792,7 @@
     }
 
     const updateTrainingsTableDOM = () => {
-      $('#doszkolenie ~ table tbody tr').each(function (index) {
+      $(TRAINING_TABLE_ROWS_SELECTOR).each(function (index) {
         if (!isFilterApplied) {
           $(this).show()
           return
@@ -770,12 +806,17 @@
       })
     }
 
+    const updateTrainingsInputSelectDOM = () => {
+
+    }
+
     React.useEffect(() => {
       filterTrainings()
     }, [filterFields, negationFields])
 
     React.useEffect(() => {
       updateTrainingsTableDOM()
+      updateTrainingsInputSelectDOM()
     }, [filteredTrainingIds])
 
     return (
