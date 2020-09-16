@@ -318,39 +318,52 @@
         </table>
 
 
+        <h5>Rejestracja</h5>
+        <form method="post">
+          <input type="hidden" name="frm_action" value="event-register"/>
+          <table class="dl-table-70 b-o-m">
 
-        <h5>Rejestracja</h5><form method="post">
-  <input type="hidden" name="frm_action" value="event-register" />
-  <table class="dl-table-70 b-o-m">
-
-    <tr class="">
-      <th scope="row" class="b-o-m" style="font-weight: 700;max-width:50px">Termin</th>
-      <td class="b-o-m"> <select name="comp_game" class="input-large">
-    <option value='1432_105_180'>WLDF 15.09, g. 21:00 AKM 7.62 Jack (70zł)</option><br/>
-<option value='1432_96_180'>WLDF 15.09, g. 21:00 Mossberg 88 (40zł)</option><br/>
-<option value='1432_181_180'>WLDF 15.09, g. 21:00 POF MP5 (45zł)</option><br/>
-<option value='1432_102_180'>WLDF 15.09, g. 21:00 S&W MP15-22 (30zł)</option><br/>
-<option value='1432_105_240'>WLDF 15.09, g. 22:00 AKM 7.62 Jack (70zł)</option><br/>
-<option value='1432_81_240'>WLDF 15.09, g. 22:00 Glock 17 (45zł)</option><br/>
-<option value='1432_58_240'>WLDF 15.09, g. 22:00 Margolin (30zł)</option><br/>
-<option value='1432_181_240'>WLDF 15.09, g. 22:00 POF MP5 (45zł)</option><br/>
-<option value='1432_102_240'>WLDF 15.09, g. 22:00 S&W MP15-22 (30zł)</option><br/>
-<option value='1432_105_270'>WLDF 15.09, g. 22:30 AKM 7.62 Jack (70zł)</option><br/>
-<option value='1432_81_270'>WLDF 15.09, g. 22:30 Glock 17 (45zł)</option><br/>
-<option value='1432_96_270'>WLDF 15.09, g. 22:30 Mossberg 88 (40zł)</option><br/>
-<option value='1432_181_270'>WLDF 15.09, g. 22:30 POF MP5 (45zł)</option><br/>
-<option value='1432_102_270'>WLDF 15.09, g. 22:30 S&W MP15-22 (30zł)</option>
-<option value='1402_105_240'>SKW 16.09, g. 15:00 AKM 7.62 Jack (70zł)</option></select></td>
-    </tr>
-    <tr class="b-o-m">
-    <td></td>
-      <td class="b-o-m"><strong><button type="submit">Zapisz mnie</button></strong></td>
-    </tr>
-  </table>
-</form>
-
-
-
+            <tr class="">
+              <th scope="row" class="b-o-m" style="font-weight: 700;max-width:50px">Termin</th>
+              <td class="b-o-m"><select name="comp_game" class="input-large">
+                <option value='1432_105_180'>WLDF 15.09, g. 21:00 AKM 7.62 Jack (70zł)</option>
+                <br/>
+                <option value='1432_96_180'>WLDF 15.09, g. 21:00 Mossberg 88 (40zł)</option>
+                <br/>
+                <option value='1432_181_180'>WLDF 15.09, g. 21:00 POF MP5 (45zł)</option>
+                <br/>
+                <option value='1432_102_180'>WLDF 15.09, g. 21:00 S&W MP15-22 (30zł)</option>
+                <br/>
+                <option value='1432_105_240'>WLDF 15.09, g. 22:00 AKM 7.62 Jack (70zł)</option>
+                <br/>
+                <option value='1432_81_240'>WLDF 15.09, g. 22:00 Glock 17 (45zł)</option>
+                <br/>
+                <option value='1432_58_240'>WLDF 15.09, g. 22:00 Margolin (30zł)</option>
+                <br/>
+                <option value='1432_181_240'>WLDF 15.09, g. 22:00 POF MP5 (45zł)</option>
+                <br/>
+                <option value='1432_102_240'>WLDF 15.09, g. 22:00 S&W MP15-22 (30zł)</option>
+                <br/>
+                <option value='1432_105_270'>WLDF 15.09, g. 22:30 AKM 7.62 Jack (70zł)</option>
+                <br/>
+                <option value='1432_81_270'>WLDF 15.09, g. 22:30 Glock 17 (45zł)</option>
+                <br/>
+                <option value='1432_96_270'>WLDF 15.09, g. 22:30 Mossberg 88 (40zł)</option>
+                <br/>
+                <option value='1432_181_270'>WLDF 15.09, g. 22:30 POF MP5 (45zł)</option>
+                <br/>
+                <option value='1432_102_270'>WLDF 15.09, g. 22:30 S&W MP15-22 (30zł)</option>
+                <option value='1402_105_240'>SKW 16.09, g. 15:00 AKM 7.62 Jack (70zł)</option>
+              </select></td>
+            </tr>
+            <tr class="b-o-m">
+              <td></td>
+              <td class="b-o-m"><strong>
+                <button type="submit">Zapisz mnie</button>
+              </strong></td>
+            </tr>
+          </table>
+        </form>
 
 
         <h3 id="rozkladanie">Kurs budowy i obsługi broni</h3>
@@ -405,16 +418,21 @@
 
   .filter-row {
     display: flex;
+    flex-direction: column;
     margin: 5px 0;
-    align-items: center;
+  }
+
+  .filter-row-header {
+    display: flex;
+    height: 28px;
   }
 
   .filter-row.title {
-    height: 24px;
     font-size: 12px;
     margin-right: 5px;
     display: flex;
     align-items: center;
+    justify-content: center;
   }
 
   .filter-row.title.no-results {
@@ -422,7 +440,6 @@
   }
 
   .filter-row.title .filter-label {
-    margin-left: 15px;
   }
 
   .filter-row select {
@@ -474,8 +491,9 @@
   .filter-label.title {
     border: 0;
     pointer-events: none;
-    width: 68px;
-    text-align: right;
+    margin-left: 0;
+    margin-bottom: 0;
+    width: 55px;
   }
 
 </style>
@@ -646,7 +664,7 @@
       { selected: isSelected },
       { secondary: isSecondary },
       { 'is-negated': isSelected && isNegated },
-      { 'negation-button': isNegationButton },
+      { 'negation-button': isNegationButton }
     )
 
     const onClick = handleClick || (() => null)
@@ -821,15 +839,27 @@
 
     return (
       <div className="filter-container">
-        <div className={classNames('filter-row title', { 'no-results': isFilterApplied && !hasAnyFilterResults })}>
-          <div>{getFilterText()}</div>
+        <div className='filter-row-header'>
+          <div className={classNames('filter-row title', { 'no-results': isFilterApplied && !hasAnyFilterResults })}>
+            <div>{getFilterText()}</div>
+          </div>
           {isFilterApplied &&
-            <Label isSecondary isClearButton text='Wyczyść filtry' handleClick={handleClearFilter}/>
+          <Label isSecondary isClearButton text='Wyczyść filtry' handleClick={handleClearFilter}/>
           }
         </div>
 
         <div className='filter-row'>
-          <Label isTitle text='Obiekt:'/>
+          <div className='filter-row-header'>
+            <Label isTitle text='Obiekt:'/>
+
+            {filterFields[VENUE] &&
+            <React.Fragment>
+              <Label isSecondary isNegationButton isSelected={negationFields[VENUE]} text='Oprócz wybranych'
+                     handleClick={handleNegationFieldsClick(VENUE)}/>
+              <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(VENUE)}/>
+            </React.Fragment>
+            }
+          </div>
 
           <div className='filter-options'>
             {options.venues.map((venueName) => (
@@ -837,17 +867,21 @@
                      handleClick={handleFilterFieldClick(VENUE, venueName)} isNegated={negationFields[VENUE]}/>
             ))}
           </div>
-
-          {filterFields[VENUE] &&
-          <React.Fragment>
-            <Label isSecondary isNegationButton isSelected={negationFields[VENUE]} text='Oprócz wybranych' handleClick={handleNegationFieldsClick(VENUE)} />
-            <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(VENUE)}/>
-          </React.Fragment>
-          }
         </div>
 
         <div className='filter-row'>
-          <Label isTitle text='Dni:'/>
+          <div className='filter-row-header'>
+            <Label isTitle text='Dni:'/>
+
+            {filterFields[DAYS].length > 0 &&
+            <React.Fragment>
+              <Label isSecondary isNegationButton isSelected={negationFields[DAYS]} text='Oprócz wybranych'
+                     handleClick={handleNegationFieldsClick(DAYS)}/>
+              <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(DAYS)}/>
+            </React.Fragment>
+            }
+          </div>
+
           <div className='filter-options'>
             {options.days.map(day => (
               <Label key={day} text={day} isSelected={filterFields[DAYS].includes(day)}
@@ -855,17 +889,22 @@
             ))}
           </div>
 
-          {filterFields[DAYS].length > 0 &&
-          <React.Fragment>
-            <Label isSecondary isNegationButton isSelected={negationFields[DAYS]} text='Oprócz wybranych' handleClick={handleNegationFieldsClick(DAYS)} />
-            <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(DAYS)} />
-          </React.Fragment>
-          }
 
         </div>
 
         <div className='filter-row'>
-          <Label isTitle text='Godziny:'/>
+          <div className='filter-row-header'>
+            <Label isTitle text='Godziny:'/>
+
+            {filterFields[HOURS].length > 0 &&
+            <React.Fragment>
+              <Label isSecondary isNegationButton isSelected={negationFields[HOURS]} text='Oprócz wybranych'
+                     handleClick={handleNegationFieldsClick(HOURS)}/>
+              <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(HOURS)}/>
+            </React.Fragment>
+            }
+          </div>
+
           <div className='filter-options'>
 
             {options.hoursNoMinutes.map(hour => (
@@ -874,16 +913,19 @@
             ))}
           </div>
 
-          {filterFields[HOURS].length > 0 &&
-          <React.Fragment>
-            <Label isSecondary isNegationButton isSelected={negationFields[HOURS]} text='Oprócz wybranych' handleClick={handleNegationFieldsClick(HOURS)} />
-            <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(HOURS)} />
-          </React.Fragment>
-          }
         </div>
 
         <div className='filter-row'>
-          <Label isTitle text='Broń:'/>
+          <div className='filter-row-header'>
+            <Label isTitle text='Broń:'/>
+
+            {filterFields[GUN] &&
+            <React.Fragment>
+              <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(GUN)}/>
+            </React.Fragment>
+            }
+          </div>
+
           <div className='filter-options'>
 
             <select value={filterFields[GUN]} onChange={handleFilterFieldClick(GUN, null, true)}>
@@ -921,12 +963,6 @@
             </select>
 
           </div>
-
-          {filterFields[GUN] &&
-          <React.Fragment>
-            <Label isSecondary isClearButton text='Wyczyść' handleClick={handleClearField(GUN)} />
-          </React.Fragment>
-          }
         </div>
 
       </div>
