@@ -1838,12 +1838,6 @@
 
       const [filteredTrainings, setFilteredTrainings] = React.useState([])
 
-      const filteredTrainingIds = filteredTrainings.map(training => training.id)
-      const filteredTrainingsCount = filteredTrainings.length
-      const totalTrainingsCount = trainings.length
-      const isFilterApplied = getIsFilterApplied(filterFields)
-      const hasAnyFilterResults = isFilterApplied && filteredTrainingsCount > 0
-
       const handleNegationFieldsClick = (group, shouldReset) => () => {
         let valueToSet
 
@@ -1921,7 +1915,11 @@
         return shouldNegate ? !baseCondition : baseCondition
       }
 
-      const checkIfMatches = (group, isAnythingSelected, matchingCondition) => {
+      const checkIfMatches = (group, currentFilterSelection, matchingCondition) => {
+        const isAnythingSelected = typeof currentFilterSelection === 'string'
+          ? Boolean(currentFilterSelection)
+          : Boolean(currentFilterSelection.length)
+
         if (!isAnythingSelected) {
           return true
         }
@@ -1959,16 +1957,19 @@
         }
       }
 
-      const getFilteredTrainings = (trainings, isSelect) => {
-        return trainings.filter(training => {
-          const venueMatches = checkIfMatches(VENUE, filterFields[VENUE], checkFunctions[VENUE](training, isSelect))
-          const dayMatches = checkIfMatches(DAYS, filterFields[DAYS].length, checkFunctions[DAYS](training, isSelect))
-          const hourMatches = checkIfMatches(HOURS, filterFields[HOURS].length, checkFunctions[HOURS](training, isSelect))
-          const gunMatches = checkIfMatches(GUN, filterFields[GUN], checkFunctions[GUN](training, isSelect))
+      const getFilteredTrainings = (trainings, isSelect) => (
+        trainings.filter(training => (
+          [VENUE, DAYS, HOURS, GUN].every(group => (
+            checkIfMatches(group, filterFields[group], checkFunctions[group](training, isSelect)))
+          )
+        ))
+      )
 
-          return venueMatches && dayMatches && hourMatches && gunMatches
-        })
-      }
+      const isFilterApplied = getIsFilterApplied(filterFields)
+      const filteredTrainingIds = filteredTrainings.map(training => training.id)
+      const filteredTrainingsCount = filteredTrainings.length
+      const totalTrainingsCount = trainings.length
+      const hasAnyFilterResults = isFilterApplied && filteredTrainingsCount > 0
 
       const filteredTrainingBookings = getFilteredTrainings(trainingBookings, true)
       const filteredTrainingBookingIds = filteredTrainingBookings.map(training => training.id)
