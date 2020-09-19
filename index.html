@@ -846,6 +846,12 @@ Kolor <span style="color:indianred">łososiowy</span>: masz za mało składki na
       return data
     }
 
+    const getIsFilterApplied = (filterFields) => {
+      return [VENUE, DAYS, HOURS, GUN].some(group => {
+        return filterFields[group] !== FILTER_INITIAL_VALUES[group]
+      })
+    }
+
     // Constants
 
     const $ = jQuery
@@ -855,11 +861,7 @@ Kolor <span style="color:indianred">łososiowy</span>: masz za mało składki na
     const RIFLES = ['vostok', 'mp15', 'akm', 'beryl', 'grot']
     const SHOTGUNS = ['bock', 'mossberg', 'doruk']
 
-    const initialDataTrainingsTable = []
     const initialDataTrainingsSelect = []
-    const TABLE_DATA_INDEX_DATE = 0
-    const TABLE_DATA_INDEX_VENUE = 1
-    const TABLE_DATA_INDEX_GUNS = 2
 
     const VENUE = 'venue'
     const DAYS = 'days'
@@ -873,10 +875,12 @@ Kolor <span style="color:indianred">łososiowy</span>: masz za mało składki na
       [GUN]: ''
     }
 
-    const TRAINING_TABLE_ROWS_SELECTOR = '#trainings-filter-container + table tbody tr'
-    const TRAINING_SELECT_INPUT_OPTIONS_SELECTOR = 'form select[name="comp_game"] option'
+    // Pobieranie danych z tabeli treningów (DOM)
+    // mozna zastapic zwroceniem odpowiednio zformatowanych danych w jednym miejscu
 
-    // Pobieranie listy treningów z DOMu
+    const TRAINING_TABLE_ROWS_SELECTOR = '#trainings-filter-container + table tbody tr'
+
+    const initialDataTrainingsTable = []
 
     $(TRAINING_TABLE_ROWS_SELECTOR).each(function () {
       const row = []
@@ -889,6 +893,12 @@ Kolor <span style="color:indianred">łososiowy</span>: masz za mało składki na
       initialDataTrainingsTable.push(row)
     })
 
+    // Lista treningów z tabeli, z odpowiednio sformatowanymi danymi
+
+    const TABLE_DATA_INDEX_DATE = 0
+    const TABLE_DATA_INDEX_VENUE = 1
+    const TABLE_DATA_INDEX_GUNS = 2
+
     const trainings = initialDataTrainingsTable.map((dataArr, index) => ({
       id: index,
       day: getTrainingDay(dataArr[TABLE_DATA_INDEX_DATE]),
@@ -896,6 +906,8 @@ Kolor <span style="color:indianred">łososiowy</span>: masz za mało składki na
       venue: dataArr[TABLE_DATA_INDEX_VENUE],
       guns: compose(removeNonAsciiChars, getTrainingGuns)(dataArr[TABLE_DATA_INDEX_GUNS])
     }))
+
+    // Tworzenie unikalnych grup danych na potrzeby filtra
 
     const gunsAll = compose(sortItems, removeDuplicates, removeNonAsciiChars, flattenArray)(trainings.map(training => training.guns))
     const gunsByType = getGunsByType(gunsAll)
@@ -960,10 +972,7 @@ Kolor <span style="color:indianred">łososiowy</span>: masz za mało składki na
       const filteredTrainingIds = filteredTrainings.map(training => training.id)
       const filteredTrainingsCount = filteredTrainings.length
       const totalTrainingsCount = trainings.length
-      const isFilterApplied = filterFields[VENUE] !== FILTER_INITIAL_VALUES[VENUE]
-        || filterFields[DAYS] !== FILTER_INITIAL_VALUES[DAYS]
-        || filterFields[HOURS] !== FILTER_INITIAL_VALUES[HOURS]
-        || filterFields[GUN] !== FILTER_INITIAL_VALUES[GUN]
+      const isFilterApplied = getIsFilterApplied(filterFields)
       const hasAnyFilterResults = isFilterApplied && filteredTrainingsCount > 0
 
       const getFilterText = () => {
